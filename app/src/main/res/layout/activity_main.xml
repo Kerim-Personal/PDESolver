@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2D Laplace Denklemi Çözücü (∇²u = 0)"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/etGridSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Izgara Boyutu (örn: 20)"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Sınır Koşulları:" />
+
+    <EditText
+        android:id="@+id/etTopBoundary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Üst Kenar Değeri"
+        android:inputType="numberDecimal" />
+
+    <EditText
+        android:id="@+id/etBottomBoundary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Alt Kenar Değeri"
+        android:inputType="numberDecimal" />
+
+    <EditText
+        android:id="@+id/etLeftBoundary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Sol Kenar Değeri"
+        android:inputType="numberDecimal" />
+
+    <EditText
+        android:id="@+id/etRightBoundary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Sağ Kenar Değeri"
+        android:inputType="numberDecimal" />
+
+    <Button
+        android:id="@+id/btnSolve"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:text="Çöz" />
+
+    <com.example.pdesolver.HeatmapView
+        android:id="@+id/heatmapView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>
