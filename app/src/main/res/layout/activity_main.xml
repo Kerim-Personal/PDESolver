@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
+// app/src/main/res/layout/activity_main.xml
+    <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,50 +11,152 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="2D Laplace Denklemi Çözücü (∇²u = 0)"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:text="PDE Solver"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PDE Tipi:"
+        android:textSize="16sp" />
+
+    <Spinner
+        android:id="@+id/spinnerPdeType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/pde_types"
+        android:minHeight="48dp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Denklem:"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/etEquation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Denklem burada gösterilecek/girilecek"
+        android:enabled="false"
+        android:textStyle="italic"
+        android:layout_marginBottom="8dp"/>
 
     <EditText
         android:id="@+id/etGridSize"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Izgara Boyutu (örn: 20)"
-        android:inputType="number" />
+        android:inputType="number"
+        android:minHeight="48dp"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Sınır Koşulları:" />
+        android:layout_marginTop="8dp"
+        android:text="Sınır Koşulları:"
+        android:textSize="16sp" />
 
     <EditText
         android:id="@+id/etTopBoundary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Üst Kenar Değeri"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:minHeight="48dp" />
 
     <EditText
         android:id="@+id/etBottomBoundary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Alt Kenar Değeri"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:minHeight="48dp" />
 
     <EditText
         android:id="@+id/etLeftBoundary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Sol Kenar Değeri"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:minHeight="48dp" />
 
     <EditText
         android:id="@+id/etRightBoundary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Sağ Kenar Değeri"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:minHeight="48dp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tvInitialConditions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Başlangıç Koşulları (t=0):"
+        android:textSize="16sp"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@+id/etInitialConditionU"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="u(x,0) (örn: sin(pi*x/L))"
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@+id/etInitialConditionUt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="∂u/∂t(x,0) (sadece Dalga Denklemi için)"
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tvSolverParameters"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Çözücü Parametreleri:"
+        android:textSize="16sp"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@+id/etDeltaT"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Zaman Adımı (dt)"
+        android:inputType="numberDecimal"
+        android:minHeight="48dp"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@+id/etTimeSteps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Toplam Zaman Adımı Sayısı"
+        android:inputType="number"
+        android:minHeight="48dp"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@+id/etAlphaOrC"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Alfa (Isı) veya c (Dalga)"
+        android:inputType="numberDecimal"
+        android:minHeight="48dp"
+        android:visibility="gone"/>
+
 
     <Button
         android:id="@+id/btnSolve"

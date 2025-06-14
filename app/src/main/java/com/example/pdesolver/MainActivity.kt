@@ -1,25 +1,109 @@
+// app/src/main/java/com/example/pdesolver/MainActivity.kt
 package com.example.pdesolver
 
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.pdesolver.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
+import kotlin.math.sin
+import kotlin.math.PI
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var selectedPdeType: PdeType = PdeType.LAPLACE
+
+    // Enum to represent PDE types
+    enum class PdeType {
+        LAPLACE, HEAT, WAVE
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupPdeTypeSpinner()
+
         binding.btnSolve.setOnClickListener {
-            solveLaplaceEquation()
+            solvePDE()
         }
     }
 
-    private fun solveLaplaceEquation() {
+    private fun setupPdeTypeSpinner() {
+        val pdeTypes = resources.getStringArray(R.array.pde_types)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, pdeTypes)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerPdeType.adapter = adapter
+
+        binding.spinnerPdeType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedPdeType = when (position) {
+                    0 -> PdeType.LAPLACE
+                    1 -> PdeType.HEAT
+                    2 -> PdeType.WAVE
+                    else -> PdeType.LAPLACE
+                }
+                updateUiForPdeType(selectedPdeType)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Do nothing
+            }
+        }
+        // Initial UI setup
+        updateUiForPdeType(selectedPdeType)
+    }
+
+    private fun updateUiForPdeType(pdeType: PdeType) {
+        // Reset visibility for all fields first
+        binding.tvInitialConditions.visibility = View.GONE
+        binding.etInitialConditionU.visibility = View.GONE
+        binding.etInitialConditionUt.visibility = View.GONE
+        binding.tvSolverParameters.visibility = View.GONE
+        binding.etDeltaT.visibility = View.GONE
+        binding.etTimeSteps.visibility = View.GONE
+        binding.etAlphaOrC.visibility = View.GONE
+
+        // Update equation hint based on PDE type
+        val equationHint = when (pdeType) {
+            PdeType.LAPLACE -> "∇²u = 0"
+            PdeType.HEAT -> "∂u/∂t = α * ∂²u/∂x²"
+            PdeType.WAVE -> "∂²u/∂t² = c² * ∂²u/∂x²"
+        }
+        binding.etEquation.setText(equationHint)
+
+        when (pdeType) {
+            PdeType.LAPLACE -> {
+                // All boundary conditions are visible by default from XML
+                // No initial conditions or extra parameters needed for Laplace
+            }
+            PdeType.HEAT -> {
+                binding.tvInitialConditions.visibility = View.VISIBLE
+                binding.etInitialConditionU.visibility = View.VISIBLE
+                binding.tvSolverParameters.visibility = View.VISIBLE
+                binding.etDeltaT.visibility = View.VISIBLE
+                binding.etTimeSteps.visibility = View.VISIBLE
+                binding.etAlphaOrC.visibility = View.VISIBLE
+                binding.etAlphaOrC.hint = "Alfa (Termal Difüzivite)"
+            }
+            PdeType.WAVE -> {
+                binding.tvInitialConditions.visibility = View.VISIBLE
+                binding.etInitialConditionU.visibility = View.VISIBLE
+                binding.etInitialConditionUt.visibility = View.VISIBLE
+                binding.tvSolverParameters.visibility = View.VISIBLE
+                binding.etDeltaT.visibility = View.VISIBLE
+                binding.etTimeSteps.visibility = View.VISIBLE
+                binding.etAlphaOrC.visibility = View.VISIBLE
+                binding.etAlphaOrC.hint = "c (Dalga Hızı)"
+            }
+        }
+    }
+
+    private fun solvePDE() {
         // Kullanıcı girdilerini al
         val gridSize = binding.etGridSize.text.toString().toIntOrNull() ?: 20
         val topBoundary = binding.etTopBoundary.text.toString().toDoubleOrNull() ?: 100.0
@@ -27,25 +111,49 @@ class MainActivity : AppCompatActivity() {
         val leftBoundary = binding.etLeftBoundary.text.toString().toDoubleOrNull() ?: 0.0
         val rightBoundary = binding.etRightBoundary.text.toString().toDoubleOrNull() ?: 0.0
 
-        // Hesaplamayı arayüzü kilitlememek için arka planda (coroutine) yap
+        // Ortak hata kontrolü
+        if (gridSize <= 1) {
+            // Toast mesajı gösterebilirsiniz
+            return
+        }
+
         CoroutineScope(Dispatchers.Default).launch {
-            val solution = performCalculation(gridSize, topBoundary, bottomBoundary, leftBoundary, rightBoundary)
+            val solution: Array<Array<Double>>? = when (selectedPdeType) {
+                PdeType.LAPLACE -> performLaplaceCalculation(gridSize, topBoundary, bottomBoundary, leftBoundary, rightBoundary)
+                PdeType.HEAT -> {
+                    val initialConditionU = binding.etInitialConditionU.text.toString()
+                    val deltaT = binding.etDeltaT.text.toString().toDoubleOrNull() ?: 0.01
+                    val timeSteps = binding.etTimeSteps.text.toString().toIntOrNull() ?: 100
+                    val alpha = binding.etAlphaOrC.text.toString().toDoubleOrNull() ?: 1.0
+                    performHeatCalculation(gridSize, leftBoundary, rightBoundary, initialConditionU, deltaT, timeSteps, alpha)
+                }
+                PdeType.WAVE -> {
+                    val initialConditionU = binding.etInitialConditionU.text.toString()
+                    val initialConditionUt = binding.etInitialConditionUt.text.toString()
+                    val deltaT = binding.etDeltaT.text.toString().toDoubleOrNull() ?: 0.01
+                    val timeSteps = binding.etTimeSteps.text.toString().toIntOrNull() ?: 100
+                    val c = binding.etAlphaOrC.text.toString().toDoubleOrNull() ?: 1.0
+                    performWaveCalculation(gridSize, leftBoundary, rightBoundary, initialConditionU, initialConditionUt, deltaT, timeSteps, c)
+                }
+            }
 
             // Sonucu UI thread'inde göster
             withContext(Dispatchers.Main) {
-                binding.heatmapView.setData(solution)
+                solution?.let {
+                    binding.heatmapView.setData(it)
+                }
             }
         }
     }
 
-    private fun performCalculation(
+    // --- Laplace Equation Solver (Existing one, slightly modified for consistency) ---
+    private fun performLaplaceCalculation(
         gridSize: Int,
         top: Double,
         bottom: Double,
         left: Double,
         right: Double
     ): Array<Array<Double>> {
-        // Izgarayı (matrisi) oluştur
         val grid = Array(gridSize) { Array(gridSize) { 0.0 } }
 
         // Sınır koşullarını ata
@@ -76,5 +184,173 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return grid
+    }
+
+    // --- Heat Equation Solver (1D for simplicity, can be extended to 2D) ---
+    private fun performHeatCalculation(
+        gridSize: Int,
+        leftBoundary: Double,
+        rightBoundary: Double,
+        initialConditionU: String, // String for parsing function later
+        dt: Double, // Time step
+        timeSteps: Int, // Total time steps
+        alpha: Double // Thermal diffusivity
+    ): Array<Array<Double>> {
+        val dx = 1.0 / (gridSize - 1) // Assume length L=1 for now
+        val r = alpha * dt / (dx * dx)
+
+        // Ensure stability criterion for explicit method (r <= 0.5)
+        if (r > 0.5) {
+            // Log or show a warning to the user about instability
+            // For now, let's just adjust dt or alpha to make it stable for demonstration
+            // In a real app, you'd inform the user or prevent calculation
+            val suggestedDt = 0.5 * dx * dx / alpha
+            // You might want to update the UI with this suggestedDt or throw an error
+        }
+
+        var u = DoubleArray(gridSize) { 0.0 }
+        var uNext = DoubleArray(gridSize) { 0.0 }
+
+        // Set initial condition u(x,0)
+        for (i in 0 until gridSize) {
+            val x = i * dx
+            // Simple sine wave for demonstration. In a real app, parse initialConditionU string.
+            u[i] = parseFunction(initialConditionU, x)
+        }
+
+        // Apply boundary conditions (Dirichlet)
+        u[0] = leftBoundary
+        u[gridSize - 1] = rightBoundary
+        uNext[0] = leftBoundary
+        uNext[gridSize - 1] = rightBoundary
+
+        // For storing history for heatmap (if needed, otherwise just return final state)
+        val solutionHistory = mutableListOf<Array<Double>>()
+        solutionHistory.add(u.toTypedArray()) // Add initial state
+
+        // Explicit Finite Difference Method
+        for (t in 0 until timeSteps) {
+            for (i in 1 until gridSize - 1) {
+                uNext[i] = u[i] + r * (u[i + 1] - 2 * u[i] + u[i - 1])
+            }
+            u = uNext.copyOf()
+            solutionHistory.add(u.toTypedArray()) // Store each time step's solution
+        }
+
+        // Return the final state for heatmap, or history for animation (future feature)
+        // For now, we return a 2D array where each row is a point in time, and columns are spatial points.
+        // To display on 2D heatmap, we might need to represent 1D solution across one dimension.
+        // Let's adapt it to display the final state as a 2D grid where all rows are the same for 1D visualization.
+        val finalGrid = Array(gridSize) { Array(gridSize) { 0.0 } }
+        for (i in 0 until gridSize) {
+            for (j in 0 until gridSize) {
+                finalGrid[i][j] = u[j] // Display 1D result across all rows for heatmap
+            }
+        }
+        return finalGrid
+    }
+
+    // --- Wave Equation Solver (1D for simplicity) ---
+    private fun performWaveCalculation(
+        gridSize: Int,
+        leftBoundary: Double,
+        rightBoundary: Double,
+        initialConditionU: String, // u(x,0)
+        initialConditionUt: String, // ∂u/∂t(x,0)
+        dt: Double, // Time step
+        timeSteps: Int, // Total time steps
+        c: Double // Wave speed
+    ): Array<Array<Double>> {
+        val dx = 1.0 / (gridSize - 1) // Assume L=1 for now
+        val r = c * dt / dx
+        val rSq = r * r
+
+        // Ensure stability criterion for explicit method (r <= 1.0)
+        if (r > 1.0) {
+            // Log or show a warning to the user about instability
+            val suggestedDt = dx / c
+            // You might want to update the UI with this suggestedDt or throw an error
+        }
+
+        var u = DoubleArray(gridSize) { 0.0 } // u(t)
+        var uPrev = DoubleArray(gridSize) { 0.0 } // u(t-dt)
+        var uNext = DoubleArray(gridSize) { 0.0 } // u(t+dt)
+
+        // Set initial condition u(x,0)
+        for (i in 0 until gridSize) {
+            val x = i * dx
+            u[i] = parseFunction(initialConditionU, x)
+            uPrev[i] = u[i] // For the first step, u(t-dt) is same as u(t) for some approximations
+        }
+
+        // Apply boundary conditions
+        u[0] = leftBoundary
+        u[gridSize - 1] = rightBoundary
+        uPrev[0] = leftBoundary
+        uPrev[gridSize - 1] = rightBoundary
+        uNext[0] = leftBoundary
+        uNext[gridSize - 1] = rightBoundary
+
+        // Special handling for the first time step using initial velocity ∂u/∂t(x,0)
+        // This uses a central difference approximation for initial velocity
+        for (i in 1 until gridSize - 1) {
+            val x = i * dx
+            val initialVel = parseFunction(initialConditionUt, x)
+            uNext[i] = u[i] + dt * initialVel + 0.5 * rSq * (u[i + 1] - 2 * u[i] + u[i - 1])
+        }
+        uPrev = u.copyOf()
+        u = uNext.copyOf()
+
+        // For storing history for heatmap
+        val solutionHistory = mutableListOf<Array<Double>>()
+        solutionHistory.add(uPrev.toTypedArray()) // Add initial state
+        solutionHistory.add(u.toTypedArray()) // Add first computed state
+
+        // Explicit Finite Difference Method
+        for (t in 1 until timeSteps) { // Start from t=1 as t=0 and t=1 are handled
+            for (i in 1 until gridSize - 1) {
+                uNext[i] = 2 * u[i] - uPrev[i] + rSq * (u[i + 1] - 2 * u[i] + u[i - 1])
+            }
+            uPrev = u.copyOf()
+            u = uNext.copyOf()
+            solutionHistory.add(u.toTypedArray()) // Store each time step's solution
+        }
+
+        // Return the final state for heatmap, similar to Heat Equation
+        val finalGrid = Array(gridSize) { Array(gridSize) { 0.0 } }
+        for (i in 0 until gridSize) {
+            for (j in 0 until gridSize) {
+                finalGrid[i][j] = u[j] // Display 1D result across all rows for heatmap
+            }
+        }
+        return finalGrid
+    }
+
+    /**
+     * Parses a simple mathematical function string and evaluates it at a given x.
+     * This is a very basic parser for demonstration. For complex functions,
+     * a proper math expression parser library would be needed.
+     * Supported: "sin(pi*x/L)", "x", "constant"
+     * Assumes L=1 for simplicity in 1D problems.
+     */
+    private fun parseFunction(functionString: String, x: Double): Double {
+        return when {
+            functionString.contains("sin", ignoreCase = true) -> {
+                // Assuming "sin(pi*x/L)" or similar
+                // For simplicity, let's assume L=1, and "pi*x" means PI * x
+                // This part needs more robust parsing for real-world use.
+                // For now, a very specific match.
+                if (functionString.equals("sin(pi*x/L)", ignoreCase = true) || functionString.equals("sin(pi*x)", ignoreCase = true)) {
+                    sin(PI * x)
+                } else if (functionString.equals("sin(2*pi*x/L)", ignoreCase = true) || functionString.equals("sin(2*pi*x)", ignoreCase = true)) {
+                    sin(2 * PI * x)
+                }
+                else { // Default to 0 if not matched or malformed
+                    0.0
+                }
+            }
+            functionString.equals("x", ignoreCase = true) -> x
+            else -> functionString.toDoubleOrNull() ?: 0.0 // Try to parse as a constant
+        }
     }
 }

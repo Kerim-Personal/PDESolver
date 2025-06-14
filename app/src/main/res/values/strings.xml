@@ -1,3 +1,9 @@
+
 <resources>
     <string name="app_name">PDE Solver</string>
+    <string-array name="pde_types">
+        <item>Laplace Equation</item>
+        <item>Heat Equation</item>
+        <item>Wave Equation</item>
+    </string-array>
 </resources>
