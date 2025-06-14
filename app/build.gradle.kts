@@ -1,6 +1,8 @@
+// kerim-personal/pdesolver/PDESolver-3adbc54dfbef6d0827a150e07deabfb1c57b3153/app/build.gradle.kts
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // alias(libs.plugins.kotlin.compose) // Bu satır kaldırıldı
 }
 
 android {
@@ -33,11 +35,8 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    // buildFeatures bloğunu XML tabanlı sisteme göre düzenliyoruz.
     buildFeatures {
-        // Compose'u kullanmadığımız için 'false' yapıyoruz.
-        compose = false
-        // View Binding'i kullandığımız için 'true' yapıyoruz.
+        compose = false // Compose'u kullanmadığımız için 'false' olarak kalmalı
         viewBinding = true
     }
 }
@@ -45,18 +44,12 @@ android {
 dependencies {
     // --- GEREKLİ TEMEL KÜTÜPHANELER ---
     implementation(libs.androidx.core.ktx)
-    // AppCompatActivity için bu kütüphane ZORUNLUDUR. Hataların çoğu buradan kaynaklanıyor.
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    // Materyal Tasarım bileşenleri (Button, EditText vb. için)
+    implementation("androidx.appcompat:appcompat:1.7.0") // AppCompatActivity için bu kütüphane ZORUNLUDUR.
     implementation("com.google.android.material:material:1.12.0")
-    // Coroutine'leri (launch, withContext vb.) kullanmak için.
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
-
     // --- SAYISAL HESAPLAMA KÜTÜPHANESİ ---
-    // PDE çözümü için gerekli olan matris işlemleri kütüphanesi.
     implementation("org.ejml:ejml-all:0.44.0")
-
 
     // --- TEST KÜTÜPHANELERİ ---
     testImplementation(libs.junit)
