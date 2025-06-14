@@ -1,5 +1,3 @@
-// app/build.gradle.kts
-// Source: app/build.gradle.kts (lines 5-29)
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -7,37 +5,37 @@ plugins {
 
 android {
     namespace = "com.example.pdesolver"
-    compileSdk = 35 //
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.pdesolver" //
-        minSdk = 24 //
-        targetSdk = 35 //
-        versionCode = 1 //
-        versionName = "1.0" //
+        applicationId = "com.example.pdesolver"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" //
-    } //
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
     buildTypes {
         release {
-            isMinifyEnabled = false //
+            isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), //
-                "proguard-rules.pro" //
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
-    } //
+    }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11 //
-        targetCompatibility = JavaVersion.VERSION_11 //
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "11" //
+        jvmTarget = "11"
     }
     buildFeatures {
-        viewBinding = true // Bu satırın olduğundan emin olun
+        viewBinding = true // Ensure this is true for View Binding
         compose = false
     }
 }
@@ -45,7 +43,7 @@ android {
 dependencies {
     // --- GEREKLİ TEMEL KÜTÜPHANELER ---
     implementation(libs.androidx.core.ktx)
-    implementation("androidx.appcompat:appcompat:1.7.0") //
+    implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 

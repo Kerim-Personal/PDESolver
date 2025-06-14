@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "PDE Solver"
 include(":app")
- 
